@@ -30,7 +30,7 @@ export const globalContent = {
           { label: 'Articles', href: '/articles' },
           { label: 'Listings', href: '/listings' },
           { label: 'Images', href: '/image-sharing' },
-          { label: 'PDF Library', href: '/pdf' },
+          { label: 'Reference Library', href: '/pdf' },
         ],
       },
       {

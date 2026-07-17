@@ -10,6 +10,7 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { toPlainText } from '@/editable/cards/PostCards'
 import { pagesContent } from '@/editable/content/pages.content'
+import { Ads, getSlotSizes } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -31,6 +32,7 @@ const getImage = (post: SitePost) => {
   return media || compactRaw(content.featuredImage) || compactRaw(content.image) || compactRaw(content.thumbnail) || images || ''
 }
 const compactRaw = (value: unknown) => typeof value === 'string' ? value.trim() : ''
+const pickRandom = (sizes: string[]) => sizes[Math.floor(Math.random() * sizes.length)]
 const summaryOf = (post: SitePost) => {
   const content = getContent(post)
   // compactRaw only trims — it does NOT strip HTML — so the raw payload could leak markup
@@ -71,18 +73,18 @@ function SearchResultCard({ post, index }: { post: SitePost; index: number }) {
   const strong = index % 5 === 0
 
   return (
-    <Link href={href} className={`group block overflow-hidden rounded-[2rem] border border-[var(--editable-border)] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl ${strong ? 'md:col-span-2' : ''}`}>
+    <Link href={href} className={`group block overflow-hidden rounded-[1.5rem] border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] transition duration-500 hover:border-white/30 ${strong ? 'md:col-span-2' : ''}`}>
       {image ? (
         <div className={`relative overflow-hidden bg-black ${strong ? 'aspect-[16/7]' : 'aspect-[16/10]'}`}>
           <img src={image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-          <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black">{taskLabel}</span>
+          <span className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white">{taskLabel}</span>
         </div>
       ) : null}
       <div className="p-5 sm:p-6">
-        {!image ? <span className="rounded-full bg-[var(--editable-page-text,#211713)] px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-white">{taskLabel}</span> : null}
-        <h2 className="mt-4 line-clamp-3 text-2xl font-black leading-[0.95] tracking-[-0.06em] text-[var(--editable-page-text,#211713)]">{post.title}</h2>
-        {summary ? <p className="mt-4 line-clamp-3 text-sm font-semibold leading-7 text-[var(--editable-page-text,#211713)]/65">{summary}</p> : null}
+        {!image ? <span className="rounded-full border border-[var(--editable-border)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[#9fecff]">{taskLabel}</span> : null}
+        <h2 className="editable-display mt-4 line-clamp-3 text-3xl font-normal leading-[.95] tracking-[-.04em]">{post.title}</h2>
+        {summary ? <p className="mt-4 line-clamp-3 text-sm leading-7 text-[var(--slot4-muted-text)]">{summary}</p> : null}
         <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] opacity-60 group-hover:opacity-100">Open result <ArrowRight className="h-4 w-4" /></span>
       </div>
     </Link>
@@ -104,14 +106,14 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
   return (
     <EditableSiteShell>
       <main className="min-h-screen bg-[var(--editable-page-bg,#fff7ee)] text-[var(--editable-page-text,#2f1d16)]">
-        <section className="mx-auto max-w-[var(--editable-container)] px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-          <div className="grid gap-8 rounded-[2.5rem] border border-[var(--editable-border)] bg-white/70 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur md:grid-cols-[0.8fr_1.2fr] lg:p-10">
+        <section className="mx-auto max-w-[var(--editable-container)] px-4 py-20 sm:px-6 lg:px-10">
+          <div className="grid gap-8 rounded-[2rem] border border-[var(--editable-border)] bg-[var(--slot4-surface-bg)] p-6 md:grid-cols-[.8fr_1.2fr] lg:p-10">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.28em] opacity-55">{pagesContent.search.hero.badge}</p>
-              <h1 className="mt-5 text-5xl font-black leading-[0.92] tracking-[-0.08em] sm:text-7xl">{pagesContent.search.hero.title}</h1>
+              <p className="editable-mono text-[11px] uppercase tracking-[.14em] text-[#9fecff]">{pagesContent.search.hero.badge}</p>
+              <h1 className="editable-display mt-6 text-5xl font-normal leading-[.92] tracking-[-.06em] sm:text-7xl">{pagesContent.search.hero.title}</h1>
               <p className="mt-6 max-w-xl text-base font-semibold leading-8 opacity-70">{pagesContent.search.hero.description}</p>
             </div>
-            <form action="/search" className="self-end rounded-[2rem] border border-[var(--editable-border)] bg-[var(--editable-page-bg,#fff7ee)] p-4 sm:p-5">
+            <form action="/search" className="self-end rounded-[1.5rem] border border-[var(--editable-border)] bg-[#0a0a0a] p-4 sm:p-5">
               <input type="hidden" name="master" value="1" />
               <label className="flex items-center gap-3 rounded-2xl border border-[var(--editable-border)] bg-white px-4 py-3">
                 <Search className="h-5 w-5 opacity-45" />
@@ -127,7 +129,7 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
                   {enabledTasks.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
                 </select>
               </div>
-              <button className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[var(--editable-page-text,#2f1d16)] px-6 text-sm font-black uppercase tracking-[0.18em] text-[var(--editable-page-bg,#fff7ee)] transition hover:-translate-y-0.5" type="submit">Search</button>
+              <button className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--slot4-accent)] px-6 text-sm font-semibold text-black" type="submit">Search</button>
             </form>
           </div>
 
@@ -149,6 +151,7 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
               <p className="mt-3 text-sm font-semibold opacity-60">Try a different keyword, task type, or category.</p>
             </div>
           )}
+          <div className="mt-12"><Ads slot="footer" size={pickRandom(getSlotSizes('footer'))} showLabel /></div>
         </section>
       </main>
     </EditableSiteShell>

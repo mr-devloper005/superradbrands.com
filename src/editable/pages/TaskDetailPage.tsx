@@ -8,6 +8,7 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { EditableArticleComments } from '@/editable/components/EditableArticleComments'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads, getSlotSizes } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -62,6 +63,7 @@ const escapeHtml = (value: string) => value
   .replace(/'/g, '&#39;')
 
 const safeUrl = (value: string) => /^https?:\/\//i.test(value) ? value : '#'
+const pickRandom = (sizes: string[]) => sizes[Math.floor(Math.random() * sizes.length)]
 
 const linkifyMarkdown = (value: string) => value
   .replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/gi, (_match, label, url) => `<a href="${safeUrl(url)}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>`)
@@ -218,36 +220,61 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
   const phone = getField(post, ['phone', 'telephone', 'mobile'])
   const email = getField(post, ['email'])
   const website = getField(post, ['website', 'url'])
+  const hours = getField(post, ['hours', 'openingHours', 'openHours'])
   const mapSrc = mapSrcFor(post)
   return (
-    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
+    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-10">
       <BackLink task="listing" />
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px]">
         <article className="min-w-0">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
-              {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-12 w-12 text-[var(--tk-muted)]" />}
-            </div>
-            <div className="min-w-0">
-              <Kicker task="listing">Business listing</Kicker>
-              <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.04] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
-              <DetailMeta post={post} category={getField(post, ['category'])} />
-            </div>
-          </div>
-          {leadText(post) ? <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
-          <InfoGrid items={[['Location', address, MapPin], ['Phone', phone, Phone], ['Email', email, Mail], ['Website', website, Globe2]]} />
-          <Divider />
-          <BodyContent post={post} />
-          <ImageStrip images={images.slice(1)} label="Showcase" />
+          <Kicker task="listing">Local record</Kicker>
+          <h1 className="editable-display mt-5 max-w-4xl text-balance text-5xl font-normal leading-[.95] tracking-[-.055em] sm:text-6xl lg:text-7xl">{post.title}</h1>
+          <DetailMeta post={post} category={getField(post, ['category'])} />
+          {leadText(post) ? <p className="editable-display mt-8 max-w-3xl text-2xl leading-[1.25] text-[var(--tk-muted)]">{leadText(post)}</p> : null}
+          <div className="mt-10 overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-raised)]">{logo ? <img src={logo} alt="" className="aspect-[16/9] w-full object-cover" /> : <div className="flex aspect-[16/9] items-center justify-center"><Building2 className="h-16 w-16 text-[var(--tk-muted)]" /></div>}</div>
+          <div className="mt-5 grid border-y border-[var(--tk-line)] sm:grid-cols-3">{[['Location', address || 'Available on request'], ['Phone', phone || 'Contact for details'], ['Hours', hours || 'See contact panel']].map(([label, value]) => <div key={label} className="border-[var(--tk-line)] px-4 py-5 sm:border-r last:border-0"><p className="editable-mono text-[10px] uppercase tracking-[.13em] text-[#9fecff]">{label}</p><p className="mt-2 text-sm font-medium">{value}</p></div>)}</div>
+          <div className="mt-14"><p className="editable-mono text-[11px] uppercase tracking-[.14em] text-[#9fecff]">The story</p><h2 className="editable-display mt-4 text-4xl">Know the place before you go.</h2><BodyContent post={post} /></div>
+          <ImageStrip images={images.slice(1)} label="Inside the place" />
+          {mapSrc ? <div className="mt-12"><MapBox src={mapSrc} label={address || post.title} /></div> : null}
         </article>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          {mapSrc ? <MapBox src={mapSrc} label={address || post.title} /> : null}
-          <ContactAction website={website} phone={phone} email={email} />
+          <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6"><p className="editable-mono text-[10px] uppercase tracking-[.14em] text-[#9fecff]">Contact</p><div className="mt-5 grid gap-3 text-sm">{address ? <a href={mapSrc || '#'} className="flex gap-3 text-[var(--tk-muted)] hover:text-white"><MapPin className="h-4 w-4 shrink-0 text-[var(--tk-accent)]" />{address}</a> : null}{phone ? <a href={`tel:${phone}`} className="flex gap-3 text-[var(--tk-muted)] hover:text-white"><Phone className="h-4 w-4 shrink-0 text-[var(--tk-accent)]" />{phone}</a> : null}{email ? <a href={`mailto:${email}`} className="flex gap-3 text-[var(--tk-muted)] hover:text-white"><Mail className="h-4 w-4 shrink-0 text-[var(--tk-accent)]" />{email}</a> : null}{website ? <Link href={website} target="_blank" rel="noreferrer" className="flex gap-3 text-[var(--tk-muted)] hover:text-white"><Globe2 className="h-4 w-4 shrink-0 text-[var(--tk-accent)]" />Website</Link> : null}{hours ? <span className="flex gap-3 text-[var(--tk-muted)]"><CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--tk-accent)]" />{hours}</span> : null}</div>{website ? <Link href={website} target="_blank" rel="noreferrer" className="mt-6 flex w-full items-center justify-center rounded-full bg-[var(--tk-accent)] px-4 py-3 text-sm font-semibold text-[var(--tk-on-accent)]">Visit website <ArrowUpRight className="ml-2 h-4 w-4" /></Link> : null}</div>
+          <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] p-6"><p className="editable-mono text-[10px] uppercase tracking-[.14em] text-[#9fecff]">Checked details</p><ul className="mt-4 space-y-3 text-sm text-[var(--tk-muted)]"><li>✓ Contact information included</li><li>✓ Location details supplied</li><li>✓ Record ready to explore</li></ul></div>
+          <Ads slot="sidebar" size={pickRandom(getSlotSizes('sidebar'))} showLabel />
           <RelatedPanel task="listing" post={post} related={related} />
         </aside>
       </div>
+      <RelatedStrip task="listing" related={related} />
     </section>
   )
+}
+
+const humanFileSize = (value: number) => {
+  if (!Number.isFinite(value) || value <= 0) return ''
+  const units = ['B', 'KB', 'MB', 'GB']
+  const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1)
+  const amount = value / 1024 ** index
+  return `${amount >= 10 || index === 0 ? Math.round(amount) : amount.toFixed(1)} ${units[index]}`
+}
+
+async function getRealFileSize(post: SitePost, fileUrl: string) {
+  const content = getContent(post)
+  const declared = ['fileSize', 'size', 'fileSizeBytes', 'contentLength']
+    .map((key) => content[key])
+    .find((value) => typeof value === 'number' || (typeof value === 'string' && value.trim()))
+  if (typeof declared === 'number') return humanFileSize(declared)
+  if (typeof declared === 'string' && declared.trim()) {
+    const parsed = Number(declared)
+    return Number.isFinite(parsed) && parsed > 0 ? humanFileSize(parsed) : declared.trim()
+  }
+  if (!fileUrl || !/^https?:\/\//i.test(fileUrl)) return ''
+  try {
+    const response = await fetch(fileUrl, { method: 'HEAD', next: { revalidate: 3600 } })
+    const length = Number(response.headers.get('content-length'))
+    return humanFileSize(length)
+  } catch {
+    return ''
+  }
 }
 
 // ----- Classified: price-forward notice with a sticky action rail -----
@@ -343,42 +370,37 @@ function BookmarkDetail({ post, related }: { post: SitePost; related: SitePost[]
 }
 
 // ----- PDF: a document workspace -----
-function PdfDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
+async function PdfDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
   const fileUrl = getField(post, ['fileUrl', 'pdfUrl', 'documentUrl', 'url'])
+  const fileSize = await getRealFileSize(post, fileUrl)
+  const category = categoryOf(post, 'Reference material')
   return (
-    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-8">
+    <section className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-20 lg:px-10">
       <BackLink task="pdf" />
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
         <article className="min-w-0">
-          <div className="flex items-center gap-5">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[var(--tk-radius)] bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]"><FileText className="h-9 w-9" /></div>
-            <div className="min-w-0">
-              <Kicker task="pdf">{categoryOf(post, 'Document')}</Kicker>
-              <h1 className="editable-display mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-4xl">{post.title}</h1>
-            </div>
-          </div>
-          <BodyContent post={post} />
+          <div className="flex flex-wrap gap-2"><span className="editable-mono rounded-full border border-[var(--tk-line)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-[#9fecff]">Reference document</span><span className="editable-mono rounded-full border border-[var(--tk-line)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-[var(--tk-muted)]">PDF</span><span className="editable-mono rounded-full border border-[var(--tk-line)] px-3 py-1 text-[10px] uppercase tracking-[.12em] text-[var(--tk-muted)]">{category}</span></div>
+          <h1 className="editable-display mt-7 max-w-4xl text-balance text-5xl font-normal leading-[.93] tracking-[-.06em] sm:text-7xl lg:text-[5.6rem]">{post.title}</h1>
+          {leadText(post) ? <blockquote className="editable-display mt-9 max-w-3xl border-l-2 border-[var(--tk-accent)] pl-6 text-2xl leading-[1.3] text-[var(--tk-muted)]">{leadText(post)}</blockquote> : null}
+          <div className="mt-8 flex flex-wrap gap-3">{fileUrl ? <><Link href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-semibold text-[var(--tk-on-accent)]">Download file <Download className="h-4 w-4" /></Link><Link href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-5 py-3 text-sm font-semibold">Open in new tab <ExternalLink className="h-4 w-4" /></Link></> : null}</div>
+          <div className="mt-8 grid border-y border-[var(--tk-line)] sm:grid-cols-3">{[['File size', fileSize || 'Unavailable'], ['Format', 'PDF'], ['Category', category]].map(([label, value]) => <div key={label} className="border-[var(--tk-line)] px-4 py-5 sm:border-r last:border-0"><p className="editable-mono text-[10px] uppercase tracking-[.12em] text-[#9fecff]">{label}</p><p className="mt-2 text-sm">{value}</p></div>)}</div>
           {fileUrl ? (
-            <div className="mt-10 overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)]">
-              <div className="flex items-center justify-between gap-3 border-b border-[var(--tk-line)] p-4">
-                <span className="text-sm font-semibold">Document preview</span>
-                <Link href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-4 py-2 text-xs font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Download <Download className="h-4 w-4" /></Link>
-              </div>
+            <div className="mt-12 overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)]">
+              <div className="flex items-center justify-between gap-3 border-b border-[var(--tk-line)] px-5 py-4"><span className="editable-mono text-[10px] uppercase tracking-[.12em] text-[#9fecff]">File preview</span><FileText className="h-4 w-4 text-[var(--tk-muted)]" /></div>
               <iframe src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`} title={post.title} className="h-[78vh] w-full bg-[var(--tk-raised)]" />
             </div>
           ) : null}
+          <div className="mt-14 grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><div><p className="editable-mono text-[10px] uppercase tracking-[.12em] text-[#9fecff]">Context</p><h2 className="editable-display mt-4 text-4xl">What this reference holds.</h2></div><BodyContent post={post} /></div>
+          {fileUrl ? <Link href={fileUrl} target="_blank" rel="noreferrer" className="mt-10 flex items-center justify-between rounded-[var(--tk-radius)] bg-[var(--tk-accent)] px-6 py-5 font-semibold text-[var(--tk-on-accent)]">Keep this reference close <Download className="h-5 w-5" /></Link> : null}
+          <div className="mt-10"><Ads slot="article-bottom" size={pickRandom(getSlotSizes('article-bottom'))} showLabel /></div>
         </article>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          {fileUrl ? (
-            <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6">
-              <p className="text-sm font-semibold">Get this document</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--tk-muted)]">Open or download the full file in a new tab.</p>
-              <Link href={fileUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Download <Download className="h-4 w-4" /></Link>
-            </div>
-          ) : null}
+          <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6"><div className="editable-display text-6xl leading-none text-[var(--tk-accent)]">↳</div><p className="mt-5 break-all text-sm font-medium">{fileUrl?.split('/').pop() || post.title}</p><div className="mt-5 grid gap-3 border-t border-[var(--tk-line)] pt-5 text-sm text-[var(--tk-muted)]"><p>Category <span className="float-right text-white">{category}</span></p><p>File size <span className="float-right text-white">{fileSize || 'Unavailable'}</span></p></div>{fileUrl ? <Link href={fileUrl} target="_blank" rel="noreferrer" className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--tk-accent)] px-4 py-3 text-sm font-semibold text-[var(--tk-on-accent)]">Download <Download className="h-4 w-4" /></Link> : null}</div>
+          <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] p-6"><p className="editable-mono text-[10px] uppercase tracking-[.12em] text-[#9fecff]">What’s inside</p><ul className="mt-4 space-y-3 text-sm text-[var(--tk-muted)]"><li>• Core reference material</li><li>• Useful source context</li><li>• Full file preview</li></ul></div>
           <RelatedPanel task="pdf" post={post} related={related} />
         </aside>
       </div>
+      <RelatedStrip task="pdf" related={related} />
     </section>
   )
 }
@@ -418,31 +440,12 @@ function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] 
 }
 
 // ----- Shared building blocks -----
-function Divider() {
-  return <div className="my-10 h-px bg-[var(--tk-line)]" />
-}
-
 function BodyContent({ post, compact = false }: { post: SitePost; compact?: boolean }) {
   return (
     <div
       className={`article-content mt-8 max-w-none text-[var(--tk-text)] ${compact ? 'text-[15px] leading-7' : 'text-[1.0625rem] leading-8'}`}
       dangerouslySetInnerHTML={{ __html: formatPlainText(getBody(post)) }}
     />
-  )
-}
-
-function InfoGrid({ items }: { items: Array<[string, string, typeof MapPin]> }) {
-  const visible = items.filter(([, value]) => value)
-  if (!visible.length) return null
-  return (
-    <div className="mt-8 grid gap-3 sm:grid-cols-2">
-      {visible.map(([label, value, Icon]) => (
-        <div key={label} className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-4">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-[var(--tk-muted)]"><Icon className="h-4 w-4 text-[var(--tk-accent)]" /> {label}</div>
-          <p className="mt-2 break-words text-sm font-medium leading-6">{value}</p>
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -494,7 +497,7 @@ function BadgeLine({ label, value }: { label: string; value: string }) {
   )
 }
 
-function RelatedPanel({ task, post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
+function RelatedPanel({ task, post: _post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
   const taskConfig = getTaskConfig(task)
   return (
     <div className="space-y-6">
