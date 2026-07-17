@@ -8,6 +8,7 @@ import { useEditableLocalAuthSession } from '@/editable/components/EditableLocal
 
 export function EditableFooter() {
   const taskLinks = SITE_CONFIG.tasks.filter((task) => task.enabled)
+  const displayTaskLabel = (key: string, label: string) => key === 'listing' ? 'Local Directory' : key === 'pdf' ? 'Reference Library' : label
   const year = new Date().getFullYear()
   const { session, logout } = useEditableLocalAuthSession()
 
@@ -30,7 +31,7 @@ export function EditableFooter() {
           <div className="mt-4 grid gap-2">
             {taskLinks.map((task) => (
               <Link key={task.key} href={task.route} className="inline-flex items-center gap-2 text-sm font-medium text-[var(--slot4-muted-text)] transition hover:text-[var(--slot4-page-text)]">
-                {task.label} <ArrowUpRight className="h-3.5 w-3.5" />
+                {displayTaskLabel(task.key, task.label)} <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             ))}
           </div>

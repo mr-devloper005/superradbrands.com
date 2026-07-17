@@ -52,25 +52,26 @@ export const pagesContent = {
     },
   },
   about: {
-    badge: 'Our Story',
-    title: 'A calmer, clearer way to explore content.',
-    description: `${slot4BrandConfig.siteName} is built to make long-form reading, visual discovery, and supporting resources feel like one unified experience.`,
+    badge: 'About the platform',
+    title: 'Useful information, thoughtfully brought together.',
+    description: `${slot4BrandConfig.siteName} is a simple place to discover helpful information, explore new ideas, and keep useful resources within reach.`,
     paragraphs: [
-      'Instead of splitting everything into disconnected pages, the platform keeps related content easy to move through and easy to understand.',
-      'Whether someone starts with an article, listing, image post, or resource page, they can continue exploring without losing context.',
+      'We believe finding something useful should feel straightforward. The platform brings together clear, relevant content in one place, so visitors can spend less time searching and more time exploring.',
+      'Whether you are looking for a local place, a practical guide, or a starting point for your next decision, each page is designed to be easy to scan, easy to understand, and easy to return to.',
+      'The collection grows through useful contributions and careful organization. Our goal is simply to make good information more approachable for everyone.',
     ],
     values: [
       {
-        title: 'Reading-first experience',
-        description: 'We prioritize clarity, pacing, and structure so people can read, browse, and discover without noise.',
+        title: 'Built for clarity',
+        description: 'Clear language, useful context, and straightforward navigation help every visit feel effortless.',
       },
       {
-        title: 'Connected content surfaces',
-        description: 'Articles, visual posts, listings, resources, and profiles stay connected so discovery feels natural across the site.',
+        title: 'Useful by design',
+        description: 'Every entry is here to help people find a place, understand a topic, or take a confident next step.',
       },
       {
-        title: 'Simple and trustworthy',
-        description: 'We focus on clean navigation and clear page structure to help visitors find useful content faster.',
+        title: 'Open to explore',
+        description: 'Browse freely, follow your curiosity, and return whenever you need a reliable point of reference.',
       },
     ],
   },
